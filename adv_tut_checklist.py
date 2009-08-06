@@ -168,6 +168,12 @@ def test_weave():
 
 def test_cython():
     """Test basic Cython sanity"""
+
+    # Check the version string
+    from Cython.Compiler.Version import version
+    cython_version = tuple([int(x) for x in version.split('.')])
+    nt.assert_true(cython_version >= (0, 11, 2), msg="Cython version 0.11.2 is required.")
+    
     argv = sys.argv[:]
     sys.argv = ['cython_setup.py','build_ext','--inplace']
 
@@ -209,7 +215,8 @@ def test_cython():
     from cython_setup import setup
     setup()
     import cython_check
-    cython_check.func()
+    result = cython_check.func()
+    nt.assert_equal("Hello at SciPy 2009", result)
 
 
 # Test generator, don't put a docstring in it
