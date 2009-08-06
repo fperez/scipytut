@@ -282,6 +282,7 @@ def main():
         ret = nose.runmodule(argv=[__file__,'-vvs'], exit=False)
     finally:
         os.chdir(cwd)
+        print "Cleanup - removing temp directory:", TESTDIR
         shutil.rmtree(TESTDIR)
     print """
 ***************************************************************************
