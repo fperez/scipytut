@@ -136,7 +136,7 @@ def test_imports():
                'IPython',
                'numpy','scipy','scipy.weave','scipy.io',
                'matplotlib','pylab',
-               'sympy'
+               'sympy',
                'Cython', 'Cython.Distutils.build_ext',
                'enthought.traits.api',
                'enthought.traits.ui.api',
