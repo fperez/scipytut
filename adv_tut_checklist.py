@@ -68,12 +68,21 @@ def validate_cython(cython):
         raise ValueError("Cython version %s, at least %s required" %
                          (version, min_version))
 
+
 def validate_mpl(m):
     """Called if matplotlib imports.  Sets backend for further examples."""
     m.use('Agg')
     # Set this so we can see the big math title in one of the test images
     m.rcParams['figure.subplot.top'] = 0.85
 
+
+def validate_sympy(sympy):
+    min_version = '0.6.4'
+    version = sympy.__version__
+    if version < min_version:
+        raise ValueError("Sympy version %s, at least %s required" %
+                         (version, min_version))
+    
 #-----------------------------------------------------------------------------
 # Tests
 
@@ -127,7 +136,7 @@ def test_imports():
                'IPython',
                'numpy','scipy','scipy.weave','scipy.io',
                'matplotlib','pylab',
-               'nose',
+               'sympy'
                'Cython', 'Cython.Distutils.build_ext',
                'enthought.traits.api',
                'enthought.traits.ui.api',
@@ -135,7 +144,8 @@ def test_imports():
                ]
 
     validators = dict(Cython = validate_cython,
-                      matplotlib = validate_mpl)
+                      matplotlib = validate_mpl,
+                      sympy = validate_sympy)
 
     for mname in modules:
         yield (check_import, mname, validators.get(mname))
