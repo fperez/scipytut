@@ -4,7 +4,7 @@ from __future__ import with_statement
 
 Execute this code at the command line by typing:
 
-    python adv_tut_checklist.py
+    python intro_tut_checklist.py
 
 If it does NOT say 'OK' at the end, copy the *entire* output of the run and
 send it to the course instructor for help.
@@ -60,28 +60,12 @@ def c(cmd):
         raise SystemExit("Command %s failed with code: %s" % (cmd, stat))
 
 
-def validate_cython(cython):
-    """Called if Cython imports, does further version checks."""
-    from Cython.Compiler.Version import version
-    min_version = '0.11.2'
-    if version < min_version:
-        raise ValueError("Cython version %s, at least %s required" %
-                         (version, min_version))
-
-
 def validate_mpl(m):
     """Called if matplotlib imports.  Sets backend for further examples."""
     m.use('Agg')
     # Set this so we can see the big math title in one of the test images
     m.rcParams['figure.subplot.top'] = 0.85
 
-
-def validate_sympy(sympy):
-    min_version = '0.6.4'
-    version = sympy.__version__
-    if version < min_version:
-        raise ValueError("Sympy version %s, at least %s required" %
-                         (version, min_version))
     
 #-----------------------------------------------------------------------------
 # Tests
@@ -134,89 +118,15 @@ def check_import(mnames, validator=None):
 def test_imports():
     modules = ['setuptools',
                'IPython',
-               'numpy','scipy','scipy.weave','scipy.io',
+               'numpy','scipy','scipy.io',
                'matplotlib','pylab',
-               'sympy',
-               'Cython', 'Cython.Distutils.build_ext',
-               'enthought.traits.api',
-               'enthought.traits.ui.api',
-               ('enthought.traits.ui.wx','enthought.traits.ui.qt4'),
+               'enthought.mayavi.api'
                ]
 
-    validators = dict(Cython = validate_cython,
-                      matplotlib = validate_mpl,
-                      sympy = validate_sympy)
+    validators = dict(matplotlib = validate_mpl)
 
     for mname in modules:
         yield (check_import, mname, validators.get(mname))
-
-
-def test_weave():
-    "Simple code compilation and execution via scipy's weave"
-    from scipy import weave
-
-    weave.inline('int x=1;x++;')
-    
-    n,m = 1,2
-    code="""
-    int m=%s;
-    return_val=m+n;
-    """ % m
-    val = weave.inline(code,['n'])
-    nt.assert_equal(val,m+n)    
-
-
-def test_cython():
-    """Test basic Cython sanity"""
-
-    # Check the version string
-    from Cython.Compiler.Version import version
-    cython_version = tuple([int(x) for x in version.split('.')])
-    nt.assert_true(cython_version >= (0, 11, 2), msg="Cython version 0.11.2 is required.")
-    
-    argv = sys.argv[:]
-    sys.argv = ['cython_setup.py','build_ext','--inplace']
-
-    setup_code = dedent("""
-    from distutils.core import setup
-    from distutils.extension import Extension
-    from Cython.Distutils import build_ext
-    import numpy as np
-
-    setup(
-        name='Test of proper Cython installation',
-        cmdclass={'build_ext': build_ext},
-        ext_modules=[ 
-            Extension("cython_check",
-                      ["cython_check.pyx"], 
-                      include_dirs=[np.get_include()])])
-                  """)
-
-    cython_code = dedent("""
-    cimport cython
-    cimport numpy as np
-    import numpy as np
-
-    @cython.wraparound(True) # only present in Cython 0.11.2+
-    def func():
-        cdef np.ndarray[np.int_t] arr = np.arange(2000, 2100, dtype=np.int)
-        return "Hello at SciPy %d" % arr[9]
-    """)
-    
-    # Automatically write the code to local temp files
-    csetup_fname = 'cython_setup.py'
-    cython_fname = 'cython_check.pyx'
-    with open(csetup_fname,'w') as f:
-        f.write(setup_code)
-    with open(cython_fname,'w') as f:
-        f.write(cython_code)
-
-    # Try to do the cython build/import/run
-    from cython_setup import setup
-    setup()
-    import cython_check
-    result = cython_check.func()
-    nt.assert_equal("Hello at SciPy 2009", result)
 
 
 # Test generator, don't put a docstring in it
@@ -282,7 +192,6 @@ def main():
         ret = nose.runmodule(argv=[__file__,'-vvs'], exit=False)
     finally:
         os.chdir(cwd)
-        print "Cleanup - removing temp directory:", TESTDIR
         shutil.rmtree(TESTDIR)
     print """
 ***************************************************************************
