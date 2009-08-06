@@ -60,40 +60,64 @@ def c(cmd):
         raise SystemExit("Command %s failed with code: %s" % (cmd, stat))
 
 
+def validate_cython(cython):
+    """Called if Cython imports, does further version checks."""
+    from Cython.Compiler.Version import version
+    min_version = '0.11.2'
+    if version < min_version:
+        raise ValueError("Cython version %s, at least %s required" %
+                         (version, min_version))
+
+def validate_mpl(m):
+    """Called if matplotlib imports.  Sets backend for further examples."""
+    m.use('Agg')
+    # Set this so we can see the big math title in one of the test images
+    m.rcParams['figure.subplot.top'] = 0.85
+
 #-----------------------------------------------------------------------------
 # Tests
 
-def check_import(*mnames):
+def check_import(mnames, validator=None):
     """Check that the given module name can be imported.
 
     If more than one name is given, all but the last are allowed to raise
     exceptions which are ignored.  Basically, this means that any of the names
     is considered to satisfy the group, and we only report an error if they all
     fail to import.
+
+    A validator is a function that will be called with the imported module
+    object if the import succeeds.  It can either do extra tests on the module
+    (such as version checks) or simply configure it.
     """
 
-    group, last = mnames[:-1], mnames[-1]
-    for mname in group:
-        try:
-            exec "import %s as m" % mname
-        except:
-            pass
+    if isinstance(mnames, basestring):
+        exec "import %s as m" % mnames
+    else:
+        group, last = mnames[:-1], mnames[-1]
+        for mname in group:
+            try:
+                exec "import %s as m" % mname
+            except:
+                pass
+            else:
+                break # We exit on first success
         else:
-            break # We exit on first success
-    else:
-        # If we exhausted all, we try the last one without swallowing errors
-        exec "import %s as m" % last
+            # If we exhausted all, we try the last one without swallowing errors
+            exec "import %s as m" % last
 
-    if 'matplotlib' in mnames:
-        m.use('Agg')
-        m.rcParams['figure.subplot.top']= 0.85
-    
-    try:
-        vinfo = m.__version__
-    except AttributeError:
-        vinfo = '*no info*'
+    if validator is not None:
+        validator(m)
+
+    # Try to collect some version information
+    for vname in ['__version__', 'version', 'Version']:
+        try:
+            vinfo = m.__version__
+            break
+        except AttributeError:
+            pass
     else:
-        print 'MOD: %s, version: %s' % (m.__name__,vinfo)
+        vinfo = '*no info*'
+    print 'MOD: %s, version: %s' % (m.__name__,vinfo)
 
 
 # Test generators are best written without docstrings, because nose can then
@@ -110,11 +134,11 @@ def test_imports():
                ('enthought.traits.ui.wx','enthought.traits.ui.qt4'),
                ]
 
+    validators = dict(Cython = validate_cython,
+                      matplotlib = validate_mpl)
+
     for mname in modules:
-        if isinstance(mname, tuple):
-            yield (check_import, mname[0], mname[1])
-        else:
-            yield (check_import, mname)
+        yield (check_import, mname, validators.get(mname))
 
 
 def test_weave():
@@ -123,7 +147,7 @@ def test_weave():
 
     weave.inline('int x=1;x++;')
     
-    n,m=1,2
+    n,m = 1,2
     code="""
     int m=%s;
     return_val=m+n;
@@ -176,6 +200,7 @@ def test_cython():
     setup()
     import cython_check
     cython_check.func()
+
 
 # Test generator, don't put a docstring in it
 def test_loadtxt():
