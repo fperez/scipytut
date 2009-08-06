@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 from __future__ import with_statement
-"""Minimal test script to check for modules needed in python workshop.
+"""Minimal test script to check for modules needed in scipy tutorials.
 
 Execute this code at the command line by typing:
 
-python workshop_checklist.py
+    python adv_tut_checklist.py
 
 If it does NOT say 'OK' at the end, copy the *entire* output of the run and
 send it to the course instructor for help.
@@ -283,10 +283,10 @@ def main():
 
 If the printout above did not finish in 'OK' but instead says 'FAILED', copy
 and send the *entire* output, including the system information below, for help.
-We'll do our best to assist you.  You can send it your message the Scipy user
+We'll do our best to assist you.  You can send your message to the Scipy user
 mailing list:
 
-http://mail.scipy.org/mailman/listinfo/scipy-user
+    http://mail.scipy.org/mailman/listinfo/scipy-user
 
 but feel free to also CC directly: Fernando.Perez@berkeley.edu
 """
