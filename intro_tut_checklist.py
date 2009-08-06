@@ -120,6 +120,7 @@ def test_imports():
                'IPython',
                'numpy','scipy','scipy.io',
                'matplotlib','pylab',
+               'enthought.mayavi.mlab'
                ]
 
     validators = dict(matplotlib = validate_mpl)
