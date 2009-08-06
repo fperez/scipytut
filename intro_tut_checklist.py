@@ -120,7 +120,7 @@ def test_imports():
                'IPython',
                'numpy','scipy','scipy.io',
                'matplotlib','pylab',
-               'enthought.mayavi.api'
+               'enthought.mayavi.api',
                ]
 
     validators = dict(matplotlib = validate_mpl)
@@ -181,10 +181,13 @@ def test_plot_math():
 
 def main():
     """Main routine, executed when this file is run as a script """
+
+    # Create a tempdir, as a subdirectory of the current one, which all tests
+    # use for their storage.  By default, it is removed at the end.
     global TESTDIR
-    TESTDIR = tempfile.mkdtemp()
-    
     cwd = os.getcwd()
+    TESTDIR = tempfile.mkdtemp(prefix='tmp-testdata-',dir=cwd)
+    
     print "Running tests:"
     # This call form is ipython-friendly
     try:
@@ -192,6 +195,10 @@ def main():
         ret = nose.runmodule(argv=[__file__,'-vvs'], exit=False)
     finally:
         os.chdir(cwd)
+        print "Cleanup - removing temp directory:", TESTDIR
+        # If you need to debug a problem, comment out the next line that cleans
+        # up the temp directory, and you can see in there all temporary files
+        # created by the test code
         shutil.rmtree(TESTDIR)
     print """
 ***************************************************************************

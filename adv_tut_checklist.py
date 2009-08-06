@@ -60,6 +60,13 @@ def c(cmd):
         raise SystemExit("Command %s failed with code: %s" % (cmd, stat))
 
 
+def validate_mpl(m):
+    """Called if matplotlib imports.  Sets backend for further examples."""
+    m.use('Agg')
+    # Set this so we can see the big math title in one of the test images
+    m.rcParams['figure.subplot.top'] = 0.85
+
+
 def validate_cython(cython):
     """Called if Cython imports, does further version checks."""
     from Cython.Compiler.Version import version
@@ -67,13 +74,6 @@ def validate_cython(cython):
     if version < min_version:
         raise ValueError("Cython version %s, at least %s required" %
                          (version, min_version))
-
-
-def validate_mpl(m):
-    """Called if matplotlib imports.  Sets backend for further examples."""
-    m.use('Agg')
-    # Set this so we can see the big math title in one of the test images
-    m.rcParams['figure.subplot.top'] = 0.85
 
 
 def validate_sympy(sympy):
@@ -134,8 +134,11 @@ def check_import(mnames, validator=None):
 def test_imports():
     modules = ['setuptools',
                'IPython',
-               'numpy','scipy','scipy.weave','scipy.io',
+               'numpy','scipy','scipy.io',
                'matplotlib','pylab',
+               'enthought.mayavi.api',
+               # From here on, extra things only in the advanced tutorial
+               'scipy.weave',
                'sympy',
                'Cython', 'Cython.Distutils.build_ext',
                'enthought.traits.api',
@@ -143,8 +146,8 @@ def test_imports():
                ('enthought.traits.ui.wx','enthought.traits.ui.qt4'),
                ]
 
-    validators = dict(Cython = validate_cython,
-                      matplotlib = validate_mpl,
+    validators = dict(matplotlib = validate_mpl,
+                      Cython = validate_cython,
                       sympy = validate_sympy)
 
     for mname in modules:
@@ -271,10 +274,13 @@ def test_plot_math():
 
 def main():
     """Main routine, executed when this file is run as a script """
+
+    # Create a tempdir, as a subdirectory of the current one, which all tests
+    # use for their storage.  By default, it is removed at the end.
     global TESTDIR
-    TESTDIR = tempfile.mkdtemp()
-    
     cwd = os.getcwd()
+    TESTDIR = tempfile.mkdtemp(prefix='tmp-testdata-',dir=cwd)
+    
     print "Running tests:"
     # This call form is ipython-friendly
     try:
@@ -283,6 +289,9 @@ def main():
     finally:
         os.chdir(cwd)
         print "Cleanup - removing temp directory:", TESTDIR
+        # If you need to debug a problem, comment out the next line that cleans
+        # up the temp directory, and you can see in there all temporary files
+        # created by the test code
         shutil.rmtree(TESTDIR)
     print """
 ***************************************************************************
