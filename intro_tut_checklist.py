@@ -104,7 +104,7 @@ def check_import(mnames, validator=None):
     # Try to collect some version information
     for vname in ['__version__', 'version', 'Version']:
         try:
-            vinfo = m.__version__
+            vinfo = eval("m.%s" % vname)
             break
         except AttributeError:
             pass
