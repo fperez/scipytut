@@ -288,11 +288,14 @@ def main():
         ret = nose.runmodule(argv=[__file__,'-vvs'], exit=False)
     finally:
         os.chdir(cwd)
-        print "Cleanup - removing temp directory:", TESTDIR
-        # If you need to debug a problem, comment out the next line that cleans
-        # up the temp directory, and you can see in there all temporary files
-        # created by the test code
-        shutil.rmtree(TESTDIR)
+
+    print
+    print "Cleanup - removing temp directory:", TESTDIR
+    # If you need to debug a problem, comment out the next line that cleans
+    # up the temp directory, and you can see in there all temporary files
+    # created by the test code
+    shutil.rmtree(TESTDIR)
+
     print """
 ***************************************************************************
                            TESTS FINISHED
