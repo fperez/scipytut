@@ -176,9 +176,6 @@ def test_cython():
     # Check the version string
     validate_cython(None)
     
-    argv = sys.argv[:]
-    sys.argv = ['cython_setup.py','build_ext','--inplace']
-
     setup_code = dedent("""
     from distutils.core import setup
     from distutils.extension import Extension
@@ -213,9 +210,11 @@ def test_cython():
     with open(cython_fname,'w') as f:
         f.write(cython_code)
 
-    # Try to do the cython build/import/run
-    from cython_setup import setup
-    setup()
+    # Try to do the cython build/import/run.
+    # XXX - I tried importing the setup function in-process but for some
+    # mysterious reason I can't understand, it fails on Python 2.6 (it works on
+    # 2.5). So for now, just call it in an external process.
+    c('python cython_setup.py build_ext --inplace')
     import cython_check
     result = cython_check.func()
     nt.assert_equal("Hello at SciPy 2009", result)
@@ -284,7 +283,8 @@ def main():
     # This call form is ipython-friendly
     try:
         os.chdir(TESTDIR)
-        ret = nose.runmodule(argv=[__file__,'-vvs'], exit=False)
+        nose.runmodule(argv=[__file__,'-vvs','-x','--pdb'],
+                       exit=False)
     finally:
         os.chdir(cwd)
 
