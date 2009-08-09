@@ -40,7 +40,11 @@ def sys_info():
     print 'System information'
     print '=================='
     print 'os.name      :',os.name
-    print 'os.uname     :',os.uname()
+    try:
+        print 'os.uname     :',os.uname()
+    except:
+        # Unix-only
+        pass
     print 'platform     :',sys.platform
     print 'platform+    :',platform.platform()
     print 'prefix       :',sys.prefix
