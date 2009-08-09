@@ -70,10 +70,12 @@ def validate_mpl(m):
 def validate_cython(cython):
     """Called if Cython imports, does further version checks."""
     from Cython.Compiler.Version import version
-    min_version = '0.11.2'
-    if version < min_version:
-        raise ValueError("Cython version %s, at least %s required" %
-                         (version, min_version))
+
+    min_version = (0, 11, 2)
+    cython_version = tuple([int(x) for x in version.split('.')])
+    msg = "Cython version %s found, at least %s required" % (cython_version,
+                                                             min_version)
+    nt.assert_true(cython_version >= min_version, msg)
 
 
 def validate_sympy(sympy):
@@ -147,7 +149,6 @@ def test_imports():
                ]
 
     validators = dict(matplotlib = validate_mpl,
-                      Cython = validate_cython,
                       sympy = validate_sympy)
 
     for mname in modules:
@@ -173,9 +174,7 @@ def test_cython():
     """Test basic Cython sanity"""
 
     # Check the version string
-    from Cython.Compiler.Version import version
-    cython_version = tuple([int(x) for x in version.split('.')])
-    nt.assert_true(cython_version >= (0, 11, 2), msg="Cython version 0.11.2 is required.")
+    validate_cython(None)
     
     argv = sys.argv[:]
     sys.argv = ['cython_setup.py','build_ext','--inplace']
