@@ -287,7 +287,7 @@ def main():
     # This call form is ipython-friendly
     try:
         os.chdir(TESTDIR)
-        nose.runmodule(argv=[__file__,'-vvs','-x','--pdb'],
+        nose.runmodule(argv=[__file__,'-vvs'],
                        exit=False)
     finally:
         os.chdir(cwd)
