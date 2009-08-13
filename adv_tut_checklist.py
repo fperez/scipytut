@@ -163,14 +163,16 @@ def test_weave():
     "Simple code compilation and execution via scipy's weave"
     from scipy import weave
 
-    weave.inline('int x=1;x++;')
+    compiler = 'mingw32' if sys.platform == 'win32' else ''
+    
+    weave.inline('int x=1;x++;', compiler=compiler)
     
     n,m = 1,2
     code="""
     int m=%s;
     return_val=m+n;
     """ % m
-    val = weave.inline(code,['n'])
+    val = weave.inline(code,['n'], compiler=compiler)
     nt.assert_equal(val,m+n)    
 
 
